@@ -4,8 +4,10 @@ void showSnackBar(BuildContext context, String content) {
   ScaffoldMessenger.of(context).removeCurrentSnackBar();
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      backgroundColor: Colors.blue,
+      margin: const EdgeInsets.all(20),
+      backgroundColor: Colors.deepPurple,
       content: Text(content),
+      behavior: SnackBarBehavior.floating,
     ),
   );
 }

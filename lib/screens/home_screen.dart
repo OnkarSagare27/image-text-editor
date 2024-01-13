@@ -2,9 +2,9 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:image_editor/widgets/snackbar.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_editor/providers/edit_provider.dart';
-import 'package:image_editor/widgets/drag.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_editor/widgets/custom_outlined_button.dart';
@@ -25,45 +25,53 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
           actions: [
             IconButton(
-              tooltip: 'Reset',
-              onPressed: () {},
-              icon: const Icon(
-                Icons.cancel_rounded,
-                color: Colors.white,
-              ),
-            ),
-            IconButton(
               tooltip: 'Add',
-              onPressed: () {},
+              onPressed: () => editProvider.showDialogBox(context),
               icon: const Icon(
                 Icons.add,
                 color: Colors.white,
               ),
             ),
-            IconButton(
-              tooltip: 'Undo',
-              onPressed: () {},
-              icon: const Icon(
-                Icons.undo_outlined,
-                color: Colors.white,
-              ),
-            ),
-            IconButton(
-              tooltip: 'Redo',
-              onPressed: () {},
-              icon: const Icon(
-                Icons.redo_rounded,
-                color: Colors.white,
-              ),
-            ),
-            IconButton(
-              tooltip: 'Save',
-              onPressed: () => _saveImage(),
-              icon: const Icon(
-                Icons.save,
-                color: Colors.white,
-              ),
-            ),
+            editProvider.image != null
+                ? IconButton(
+                    tooltip: 'Undo',
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.undo_outlined,
+                      color: Colors.white,
+                    ),
+                  )
+                : const SizedBox(),
+            editProvider.image != null
+                ? IconButton(
+                    tooltip: 'Redo',
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.redo_rounded,
+                      color: Colors.white,
+                    ),
+                  )
+                : const SizedBox(),
+            editProvider.image != null
+                ? IconButton(
+                    tooltip: 'Save',
+                    onPressed: () => _saveImage(),
+                    icon: const Icon(
+                      Icons.save,
+                      color: Colors.white,
+                    ),
+                  )
+                : const SizedBox(),
+            editProvider.image != null
+                ? IconButton(
+                    tooltip: 'Reset',
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.cancel_rounded,
+                      color: Colors.white,
+                    ),
+                  )
+                : const SizedBox(),
           ],
           title: const Text(
             'Editor',
@@ -118,21 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             key: globalKey,
                             child: Stack(
                               fit: StackFit.expand,
-                              children: [
-                                Image.file(
-                                  editProvider.image!,
-                                  fit: BoxFit.contain,
-                                ),
-                                DraggableTextWidget(
-                                  ontap: () {},
-                                  text: 'Hi',
-                                  textStyle: TextStyle(
-                                      color: Colors.amber, fontSize: 195),
-                                  initialPosition: Offset(
-                                      MediaQuery.of(context).size.width / 2,
-                                      MediaQuery.of(context).size.height / 2),
-                                ),
-                              ],
+                              children: editProvider.textStack,
                             ),
                           ),
                   ),
@@ -142,18 +136,41 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         bottomNavigationBar: SizedBox(
-          height: 60.h,
+          height: 130.h,
           child: Column(
             children: [
-              SingleChildScrollView(
+              Container(
+                margin: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 20.h),
+                height: 50.h,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    // IconButton(
-                    //     onPressed: () {},
-                    //     icon: Icon(
-                    //       Icons.delete,
-                    //       color: Colors.deepPurple,
-                    //     ))
+                    IconButton(
+                      icon: const Icon(
+                        Icons.edit_note,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {},
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {},
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.done,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {},
+                    ),
                   ],
                 ),
               ),
@@ -177,7 +194,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       CustomOutlinedButton(
                         onPressed: () {},
-                        icon: Icons.format_align_center_rounded,
+                        icon: Icons.align_vertical_bottom_rounded,
+                      ),
+                      CustomOutlinedButton(
+                        onPressed: () {},
+                        icon: Icons.align_vertical_center_rounded,
+                      ),
+                      CustomOutlinedButton(
+                        onPressed: () {},
+                        icon: Icons.align_horizontal_center_rounded,
+                      ),
+                      CustomOutlinedButton(
+                        onPressed: () {},
+                        icon: Icons.align_vertical_top_rounded,
                       ),
                       CustomOutlinedButton(
                         onPressed: () {},
@@ -203,19 +232,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final result = await ImageGallerySaver.saveImage(uint8List);
 
     if (result['isSuccess']) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Image saved successfully'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      showSnackBar(context, 'Image saved at ${result['filePath']}');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to save image'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      showSnackBar(context, 'Failed to save image');
     }
   }
 }
